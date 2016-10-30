@@ -112,9 +112,10 @@ class GenericGMB(BaseEstimator):
         if test_data and self.param['early_stopping_round'] > 0:
             self.best_round = max(map(int, re.findall("Tree=(\d+)", self.model))) + 1
 
+
     def predict(self, X):
         tmp_dir = tempfile.mkdtemp()
-        predict_filepath = os.path.abspath(os.path.join(tmp_dir, "X_to_pred.svm"))
+        predict_filepath = os.path.abspath(os.path.join(tmp_dir, "X_to_pred.csv"))
         output_model = os.path.abspath(os.path.join(tmp_dir, "model"))
         output_results = os.path.abspath(os.path.join(tmp_dir, "LightGBM_predict_result.txt"))
         conf_filepath = os.path.join(tmp_dir, "predict.conf")
@@ -122,7 +123,7 @@ class GenericGMB(BaseEstimator):
         with open(output_model, mode="w") as file:
             file.write(self.model)
 
-        datasets.dump_svmlight_file(X, np.zeros(len(X)), f=predict_filepath)
+        np.savetxt(predict_filepath, X, delimiter=",")
 
         calls = ["task = predict\n",
                  "data = {}\n".format(predict_filepath),
@@ -265,7 +266,7 @@ class GBMClassifier(GenericGMB, ClassifierMixin):
         with open(output_model, mode="w") as file:
             file.write(self.model)
 
-        datasets.dump_svmlight_file(X, np.zeros(len(X)), f=predict_filepath)
+        np.savetxt(predict_filepath, X, delimiter=",")
 
         calls = [
             "task = predict\n",
@@ -344,3 +345,4 @@ class GBMRegressor(GenericGMB, RegressorMixin):
                                            is_unbalance=is_unbalance,
                                            verbose=verbose,
                                            model=model)
+
